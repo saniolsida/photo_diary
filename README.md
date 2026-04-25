@@ -38,9 +38,18 @@ docker-compose up --build
 
 | 레벨 | 기능 | 상태 |
 |------|------|------|
-| Lv1 | 콘텐츠 관리 — 게시글 기본 CRUD 구현 | ✅ 완료 |
-| Lv2 | 사진 업로드 — 로컬 파일 시스템 저장 및 Docker 볼륨 매핑을 통한 데이터 영속성 확보 | ✅ 완료 |
-| Lv3 | 주문 데이터 익스포트 — JSON 메타데이터 및 이미지 통합 ZIP 압축 생성 | ✅ 완료 |
+| Lv1 | 콘텐츠 관리 | ✅ 완료 |
+| Lv2 | 자체 주문 기능 | ✅ 완료 |
+| Lv3 | 주문 데이터 익스포트 | ✅ 완료 |
+
+**Lv1 — 콘텐츠 관리**
+이미지 업로드를 포함한 일기 게시글의 CRUD 기능을 구현했습니다. 로컬 파일 시스템에 이미지를 저장하며, Docker 볼륨 매핑을 통해 컨테이너 재시작 후에도 데이터가 유지됩니다. 업로드 시 이미지 포맷(확장자, MIME 타입) 및 용량 유효성 검증을 포함합니다.
+
+**Lv2 — 자체 주문 기능**
+사용자가 게시글 상세 페이지에서 "인쇄 요청" 버튼을 누르면 주문이 생성되어 관리자용 인쇄 주문 목록에 등록됩니다. 주문은 `pending → processing → completed` 흐름으로 상태가 관리되며, 관리자는 주문 목록에서 각 건의 상태를 조회하고 처리할 수 있습니다.
+
+**Lv3 — 주문 데이터 익스포트**
+관리자가 주문 목록에서 "요청 처리" 버튼을 누르면, 해당 주문의 게시글 메타데이터(JSON)와 원본 이미지를 하나의 ZIP 파일로 묶어 다운로드할 수 있습니다. 가상의 인쇄 파트너(스위트북)에게 전달 가능한 구조화된 형태로 데이터를 직렬화하는 것을 목표로 설계했습니다.
 
 ---
 
@@ -52,6 +61,33 @@ docker-compose up --build
 | Language | Java 17 | Spring Boot 호환성 및 타입 안정성 |
 | Database | H2 Database (File Mode) | 별도 DB 컨테이너 없이 경량 구동, 파일 모드로 컨테이너 재시작 후에도 데이터 유지 |
 | View Engine | Mustache | 서버 사이드 렌더링용 경량 템플릿 엔진, 로직과 뷰의 깔끔한 분리 |
+
+### 아키텍처 다이어그램
+
+```mermaid
+flowchart LR
+    Browser["🌐 브라우저\n(사용자)"]
+
+    subgraph SpringBoot["Spring Boot Application"]
+        Controller["Controller\n요청 라우팅"]
+        Service["Service\n비즈니스 로직"]
+        Repository["Repository\n데이터 접근"]
+        Mustache["Mustache\n뷰 렌더링"]
+    end
+
+    DB[("H2 DB\ndb_data/")]
+    FS["📁 파일 시스템\nuploads/"]
+
+    Browser -- "HTTP 요청" --> Controller
+    Controller -. "Model" .-> Mustache
+    Mustache -. "HTML 응답" .-> Browser
+    Controller --> Service
+    Service --> Repository
+    Repository --> DB
+    Service --> FS
+```
+
+> `db_data/`와 `uploads/`는 Docker 볼륨으로 마운트되어 컨테이너 재시작 후에도 데이터가 유지됩니다.
 
 ---
 
