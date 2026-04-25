@@ -26,7 +26,7 @@
                 </div>
                 <div class="card-body p-4">
                     {{#post}}
-                        <form action="/post/update" method="post">
+                        <form action="/post/update" method="post" enctype="multipart/form-data">
                             <input type="hidden" name="id" value="{{id}}">
                             <input type="hidden" name="createdAt" value="{{createdAt}}">
 
@@ -39,9 +39,11 @@
                                 <input type="text" name="title" class="form-control" value="{{title}}" required>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">이미지 URL</label>
-                                <input type="text" name="imageUrl" class="form-control" value="{{imageUrl}}" required>
-                                <div class="form-text">이미지 주소를 입력해 주세요. (Unsplash 등)</div>
+                                <label class="form-label fw-bold">사진 변경 (선택)</label>
+                                <input type="file" name="imageFile" class="form-control" accept="image/*">
+                                <div class="form-text text-primary small">
+                                    <i class="bi bi-info-circle"></i> 기존 사진을 유지하려면 비워두세요.
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">내용</label>

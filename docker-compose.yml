@@ -3,10 +3,13 @@ version: '3.8'
 services:
   app:
     build: .
-    # 플랫폼 명시 추가 (맥북 아키텍처 대응)
     ports:
       - "8080:8080"
     container_name: photodiary-app
+    # 추가된 부분: 볼륨 매핑
+    volumes:
+      - ./uploads:/app/uploads
+      - ./db_data:/app/data
     env_file:
       - .env
     restart: always

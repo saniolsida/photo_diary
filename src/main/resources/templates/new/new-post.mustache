@@ -14,7 +14,7 @@
                     <h4 class="mb-0">새로운 순간 기록하기</h4>
                 </div>
                 <div class="card-body">
-                    <form action="/post/create" method="post">
+                    <form action="/post/create" method="post" enctype="multipart/form-data">
                         <div class="mb-3">
                             <label class="form-label">작성자</label>
                             <input type="text" name="author" class="form-control" placeholder="이름을 입력하세요" required>
@@ -24,8 +24,9 @@
                             <input type="text" name="title" class="form-control" placeholder="제목을 입력하세요" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">이미지 URL</label>
-                            <input type="text" name="imageUrl" class="form-control" placeholder="https://..." required>
+                            <label class="form-label fw-bold">사진 올리기</label>
+                            <input type="file" name="imageFile" class="form-control" accept="image/*" required>
+                            <div class="form-text">사진을 선택해 주세요.</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">내용</label>

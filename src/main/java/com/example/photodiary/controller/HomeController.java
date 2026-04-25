@@ -9,7 +9,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Controller
@@ -31,8 +34,8 @@ public class HomeController {
     }
 
     @PostMapping("/post/create")
-    public String createPost(DiaryPost post) {
-        diaryService.savePost(post);
+    public String createPost(DiaryPost post, @RequestParam("imageFile") MultipartFile imageFile) throws IOException {
+        diaryService.savePost(post, imageFile);
         return "redirect:/";
     }
 
@@ -43,9 +46,9 @@ public class HomeController {
     }
 
     @PostMapping("/post/update")
-    public String updatePost(DiaryPost post) {
-        diaryService.savePost(post);
-        return "redirect:/";
+    public String updatePost(DiaryPost post, @RequestParam("imageFile") MultipartFile imageFile) throws IOException {
+        diaryService.savePost(post, imageFile);
+        return "redirect:/post/detail/" + post.getId();
     }
 
     @GetMapping("/post/delete/{id}")

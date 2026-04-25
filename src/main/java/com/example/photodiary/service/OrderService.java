@@ -7,12 +7,16 @@ import com.example.photodiary.repository.DiaryPostRepository;
 import com.example.photodiary.repository.PrintOrderRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +30,9 @@ public class OrderService {
     private final DiaryPostRepository diaryPostRepository;
     private final PrintOrderRepository printOrderRepository;
     private final ObjectMapper objectMapper;
+
+    @Value("${file.upload-dir}")
+    private String uploadDir;
 
     @Transactional
     public void saveOrderRequest(String address) {
@@ -87,13 +94,35 @@ public class OrderService {
 
     private void addThumbnailToZip(DiaryPost post, ZipOutputStream zos) {
         try {
-            URL url = new URL(post.getImageUrl());
-            byte[] imageBytes = StreamUtils.copyToByteArray(url.openStream());
+            String imageUrl = post.getImageUrl();
+            byte[] imageBytes;
+
+            if (imageUrl.startsWith("/images/")) {
+                // 1. 로컬 저장소(/app/uploads)에서 파일을 읽는 경우
+                String fileName = imageUrl.replace("/images/", "");
+                Path filePath = Paths.get(uploadDir).resolve(fileName);
+
+                if (Files.exists(filePath)) {
+                    imageBytes = Files.readAllBytes(filePath);
+                } else {
+                    System.err.println("⚠️ 파일을 찾을 수 없음: " + filePath);
+                    return;
+                }
+            } else {
+                // 2. 만약 기존의 외부 URL 데이터가 남아있을 경우를 대비한 하이브리드 처리
+                URL url = new URL(imageUrl);
+                imageBytes = StreamUtils.copyToByteArray(url.openStream());
+            }
+
+            // 압축 파일 내부에 이미지 저장
             ZipEntry entry = new ZipEntry("images/post_" + post.getId() + ".jpg");
             zos.putNextEntry(entry);
             zos.write(imageBytes);
             zos.closeEntry();
-        } catch (Exception ignored) {}
+
+        } catch (Exception e) {
+            System.err.println("❌ 이미지 압축 중 오류 발생 (ID " + post.getId() + "): " + e.getMessage());
+        }
     }
 
     private void addJsonToZip(Object data, ZipOutputStream zos) throws IOException {
