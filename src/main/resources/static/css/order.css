@@ -1,0 +1,33 @@
+/* 주문 관리 전용 테마 스타일 */
+.text-primary-custom { color: #0d6efd !important; }
+
+/* 데이터 처리 시작 버튼 커스텀 */
+.btn-outline-primary-custom {
+    color: #0d6efd;
+    border-color: #0d6efd;
+    background-color: #ffffff;
+    font-weight: bold;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-outline-primary-custom:hover {
+    background-color: #0d6efd;
+    color: #ffffff;
+}
+
+/* 테이블 헤더 디자인 */
+.table-thead-custom {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #0d6efd;
+}
+
+/* 상태별 배지 배경색 커스터마이징 */
+.badge-processing {
+    background-color: rgba(13, 110, 253, 0.1) !important;
+    color: #0d6efd !important;
+}
+
+.badge-completed {
+    background-color: #0d6efd !important;
+    color: #ffffff !important;
+}

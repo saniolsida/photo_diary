@@ -4,65 +4,68 @@
     <meta charset="UTF-8">
     <title>주문 관리 - Photo Diary</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/order.css">
 </head>
 <body class="bg-light">
-<nav class="navbar navbar-light bg-white shadow-sm mb-4">
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
     <div class="container">
-        <a class="navbar-brand fw-bold text-primary" href="/">📸 Photo Diary</a>
+        <a class="navbar-brand fw-bold text-primary-custom" href="/">
+            <i class="bi bi-camera-fill"></i> Photo Diary
+        </a>
     </div>
 </nav>
 
 <div class="container">
-    <div class="card shadow-sm">
-        <div class="card-header bg-white">
-            <h4 class="mb-0 fw-bold">📦 인쇄 주문 내역</h4>
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold"><i class="bi bi-box-seam me-2"></i>인쇄 주문 내역</h5>
+            <span class="badge bg-light text-dark border">관리자 전용</span>
         </div>
-        <div class="card-body">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-thead-custom">
                 <tr>
-                    <th>주문 번호</th>
+                    <th class="ps-4">주문 번호</th>
                     <th>배송지</th>
-                    <th>포함된 게시글 ID</th> <th>상태</th>
+                    <th>게시글 ID</th>
+                    <th>상태</th>
                     <th>주문 일시</th>
-                    <th>액션</th>
+                    <th class="pe-4 text-center">액션</th>
                 </tr>
                 </thead>
                 <tbody>
                 {{#orders}}
                     <tr>
-                        <td>#{{id}}</td>
+                        <td class="ps-4 fw-bold">#{{id}}</td>
+                        <td><span class="text-muted small">{{shippingAddress}}</span></td>
+                        <td><span class="badge rounded-pill badge-processing">{{displayPostIds}}</span></td>
                         <td>
-                            <span class="text-muted small">{{shippingAddress}}</span>
+                            {{#isPending}}<span class="badge bg-secondary bg-opacity-10 text-secondary">PENDING</span>{{/isPending}}
+                            {{#isProcessing}}<span class="badge badge-processing">PROCESSING</span>{{/isProcessing}}
+                            {{#isCompleted}}<span class="badge badge-completed text-white">COMPLETED</span>{{/isCompleted}}
                         </td>
-                        <td>
-                            <span class="text-primary fw-bold">{{displayPostIds}}</span>
-                        </td>
-
-                        <td>
-                            <span class="badge {{statusColor}}">{{status}}</span>
-                        </td>
-                        <td>{{orderDate}}</td>
-                        <td>
+                        <td class="text-muted small">{{orderDate}}</td>
+                        <td class="pe-4 text-center">
                             {{#isPending}}
-                                <a href="/order/process/{{id}}" class="btn btn-sm btn-warning">데이터 처리 시작</a>
+                                <a href="/order/process/{{id}}" class="btn btn-sm btn-outline-primary-custom px-3">
+                                    데이터 처리 시작
+                                </a>
                             {{/isPending}}
 
                             {{#isProcessing}}
-                                <div class="d-flex align-items-center">
-                                    <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
-                                    <span class="text-success fw-bold">데이터 패키징 중...</span>
-
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <div class="spinner-border spinner-border-sm text-primary-custom me-2" role="status"></div>
+                                    <span class="text-primary-custom small fw-bold">패키징 중...</span>
                                     <a href="/order/download/{{id}}" id="autoDownload-{{id}}" class="d-none">숨겨진 다운로드</a>
                                 </div>
-
                                 <script>
                                     window.onload = function() {
                                         setTimeout(() => {
                                             const link = document.getElementById('autoDownload-{{id}}');
                                             if (link) {
-                                                link.click(); // 숨겨진 링크 클릭
-                                                // 다운로드 완료 후 상태 반영을 위해 5초 뒤 새로고침
+                                                link.click();
                                                 setTimeout(() => { location.reload(); }, 5000);
                                             }
                                         }, 500);
@@ -71,24 +74,30 @@
                             {{/isProcessing}}
 
                             {{#isCompleted}}
-                                <span class="badge bg-light text-dark border">
-            <i class="bi bi-check-circle-fill text-success"></i> ✅ 완료됨
-        </span>
+                                <span class="text-primary-custom small fw-bold">
+                                    <i class="bi bi-check-all"></i> 처리 완료
+                                </span>
                             {{/isCompleted}}
                         </td>
                     </tr>
                 {{/orders}}
                 {{^orders}}
                     <tr>
-                        <td colspan="4" class="text-center py-5 text-muted">주문 내역이 없습니다.</td>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox display-4 d-block mb-3"></i>
+                            주문 내역이 없습니다.
+                        </td>
                     </tr>
                 {{/orders}}
                 </tbody>
             </table>
         </div>
     </div>
-    <div class="mt-3 text-end">
-        <a href="/" class="btn btn-link text-secondary">메인으로 돌아가기</a>
+
+    <div class="mt-4 text-center pb-5">
+        <a href="/" class="btn btn-link text-decoration-none text-secondary small">
+            <i class="bi bi-arrow-left"></i> 메인 화면으로 돌아가기
+        </a>
     </div>
 </div>
 </body>

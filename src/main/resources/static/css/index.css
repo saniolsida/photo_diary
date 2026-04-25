@@ -1,0 +1,82 @@
+/* 기본 배경 및 글꼴 */
+body { background-color: #f8f9fa; }
+
+/* 네비게이션 바 */
+.navbar-brand {
+    font-weight: bold;
+    color: #0d6efd !important;
+}
+
+/* 다이어리 카드 디자인 */
+.diary-card {
+    border: none;
+    transition: transform 0.2s ease-in-out, shadow 0.2s ease-in-out;
+}
+
+.diary-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+}
+
+.diary-card img {
+    height: 250px;
+    object-fit: cover; /* 사진 비율 유지하며 꽉 채우기 */
+    border-bottom: 1px solid #eee;
+}
+
+/* 텍스트 생략 처리 (여러 줄) */
+.text-truncate-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 푸터 스타일 */
+footer {
+    background-color: #ffffff;
+}
+
+/* 모달 디자인 */
+.modal-content {
+    border: none;
+    border-radius: 15px;
+}
+
+/* --- 상세 페이지(view-detail) 전용 스타일 --- */
+
+/* 상세 이미지 스타일 */
+.detail-img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    margin-bottom: 25px;
+}
+
+/* 본문 영역: 줄바꿈 유지 및 가독성 향상 */
+.content-area {
+    white-space: pre-wrap;
+    line-height: 1.8;
+    color: #333;
+    word-break: break-all; /* 긴 영문 텍스트가 화면을 넘어가지 않게 방지 */
+}
+
+/* 상세 페이지 카드 박스 */
+.detail-container {
+    background-color: #ffffff;
+    padding: 3rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 폼 관련 추가 스타일 */
+.form-label { font-weight: bold; color: #495057; }
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+.card-header-custom {
+    background-color: #ffffff;
+    border-bottom: 2px solid #0d6efd;
+    color: #0d6efd;
+}
