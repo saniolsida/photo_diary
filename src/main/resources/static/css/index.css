@@ -80,3 +80,20 @@ footer {
     border-bottom: 2px solid #0d6efd;
     color: #0d6efd;
 }
+
+/* 목록 페이지: 카드 이미지 크기 강제 고정 */
+.diary-card-img {
+    width: 100%;
+    height: 180px; !important;/* 높이를 200에서 180으로 더 줄였습니다 */
+    object-fit: cover;
+    object-position: center;
+}
+
+.detail-img {
+    display: block;
+    margin: 0 auto;
+    width: 100% !important;    /* 부모의 너비를 따르되 */
+    max-width: 500px !important; /* 절대 500px은 넘지 마라 */
+    height: auto !important;
+    border-radius: 12px;
+}
