@@ -89,11 +89,54 @@ footer {
     object-position: center;
 }
 
+/* 이미지 영역 */
 .detail-img {
+    width: 100%;
+    height: 500px;
+    object-fit: cover;
     display: block;
-    margin: 0 auto;
-    width: 100% !important;    /* 부모의 너비를 따르되 */
-    max-width: 500px !important; /* 절대 500px은 넘지 마라 */
-    height: auto !important;
-    border-radius: 12px;
+}
+
+#diaryCarousel {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* 대신 사진이 나오는 inner 영역에만 살짝 그림자를 주면 이미지가 돋보입니다 */
+.carousel-inner.shadow-sm {
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075)!important;
+}
+
+/* 컨트롤러 바: 배경 일체화 */
+.carousel-controls-bar {
+    background: transparent; /* 배경 투명 */
+    border: none; /* 테두리 제거 */
+}
+
+/* 닷(Dot) 스타일 및 움직임 효과 */
+.dot-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #adb5bd; /* 비활성 상태 회색 */
+    border: none;
+    padding: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+/* 활성화된 닷 */
+.dot-indicator.active {
+    background-color: #0d6efd; /* 활성 상태 파란색 */
+    width: 15px; /* 길쭉하게 변하는 효과 (선택사항, 깔끔함) */
+    border-radius: 4px;
+}
+
+/* 화살표 버튼 호버 효과 */
+.carousel-controls-bar .btn-link {
+    transition: transform 0.2s;
+    text-decoration: none;
+}
+.carousel-controls-bar .btn-link:hover {
+    transform: scale(1.2);
 }

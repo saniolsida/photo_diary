@@ -44,8 +44,18 @@ public class OrderController {
     }
 
     @PostMapping("/order/request")
-    public String createOrder(@RequestParam("shippingAddress") String address) {
-        orderService.saveOrderRequest(address);
+    public String createOrder(
+            @RequestParam("shippingAddress") String address,
+            @RequestParam(value = "selectedPostIds", required = false) List<Long> selectedPostIds // 이 부분 추가!
+    ) {
+        if (selectedPostIds == null || selectedPostIds.isEmpty()) {
+            // 선택된 게 없으면 메인으로 튕기기 (혹은 에러 처리)
+            return "redirect:/?error=noSelection";
+        }
+
+        // 서비스 메서드에 선택된 ID 리스트를 함께 전달
+        orderService.saveOrderRequest(address, selectedPostIds);
+
         return "redirect:/?orderSuccess=true";
     }
 
@@ -73,5 +83,11 @@ public class OrderController {
 
         // 4. 상태 완료 처리
         orderService.completeOrder(order);
+    }
+
+    @PostMapping("/order/delete/{id}")
+    public String deleteOrder(@PathVariable("id") Long id) {
+        printOrderRepository.deleteById(id);
+        return "redirect:/order"; // 다시 관리 페이지로 리다이렉트
     }
 }

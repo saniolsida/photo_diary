@@ -46,37 +46,47 @@
                             {{#isProcessing}}<span class="badge badge-processing">PROCESSING</span>{{/isProcessing}}
                             {{#isCompleted}}<span class="badge badge-completed text-white">COMPLETED</span>{{/isCompleted}}
                         </td>
-                        <td class="text-muted small">{{orderDate}}</td>
-                        <td class="pe-4 text-center">
+                        <td class="text-muted small">{{formattedDate}}</td>
+                        <td class="text-center align-middle" style="min-width: 160px;">
                             {{#isPending}}
-                                <a href="/order/process/{{id}}" class="btn btn-sm btn-outline-primary-custom px-3">
-                                    데이터 처리 시작
-                                </a>
+                                <div class="d-flex justify-content-center align-items-center gap-3">
+                                    <a href="/order/process/{{id}}" class="btn btn-sm btn-outline-primary-custom px-3 fw-bold">
+                                        승인
+                                    </a>
+
+                                    <form action="/order/delete/{{id}}" method="post"
+                                          onsubmit="return confirm('정말 이 요청을 반려(삭제)하시겠습니까?');"
+                                          class="d-inline m-0">
+                                        <button type="submit" class="btn btn-link btn-sm text-danger text-decoration-none p-0 fw-bold" style="font-size: 0.85rem;">
+                                            반려
+                                        </button>
+                                    </form>
+                                </div>
                             {{/isPending}}
 
                             {{#isProcessing}}
-                                <div class="d-flex align-items-center justify-content-center">
+                                <div class="d-flex justify-content-center align-items-center">
                                     <div class="spinner-border spinner-border-sm text-primary-custom me-2" role="status"></div>
                                     <span class="text-primary-custom small fw-bold">패키징 중...</span>
                                     <a href="/order/download/{{id}}" id="autoDownload-{{id}}" class="d-none">숨겨진 다운로드</a>
                                 </div>
                                 <script>
-                                    window.onload = function() {
-                                        setTimeout(() => {
-                                            const link = document.getElementById('autoDownload-{{id}}');
-                                            if (link) {
-                                                link.click();
-                                                setTimeout(() => { location.reload(); }, 5000);
-                                            }
-                                        }, 500);
-                                    };
+                                    setTimeout(() => {
+                                        const link = document.getElementById('autoDownload-{{id}}');
+                                        if (link) {
+                                            link.click();
+                                            setTimeout(() => { location.reload(); }, 3000);
+                                        }
+                                    }, 500);
                                 </script>
                             {{/isProcessing}}
 
                             {{#isCompleted}}
-                                <span class="text-primary-custom small fw-bold">
-                                    <i class="bi bi-check-all"></i> 처리 완료
-                                </span>
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <span class="text-primary-custom small fw-bold">
+                                        <i class="bi bi-check-all"></i> 처리 완료
+                                    </span>
+                                </div>
                             {{/isCompleted}}
                         </td>
                     </tr>

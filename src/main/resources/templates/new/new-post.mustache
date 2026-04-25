@@ -24,10 +24,46 @@
                             <input type="text" name="title" class="form-control" placeholder="제목을 입력하세요" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold">사진 올리기</label>
-                            <input type="file" name="imageFile" class="form-control" accept="image/*" required>
-                            <div class="form-text">사진을 선택해 주세요.</div>
+                            <label class="form-label fw-bold">태그</label>
+                            <select name="tag" class="form-select">
+                                <option value="">태그 선택 없음</option>
+                                <option value="일상">#일상</option>
+                                <option value="여행">#여행</option>
+                                <option value="맛집">#맛집</option>
+                            </select>
+                            <div class="form-text">하나의 카테고리를 선택해주세요.</div>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">오늘의 기분</label>
+                            <div class="d-flex flex-wrap gap-3 p-3 bg-white border rounded">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="mood" id="mood1" value="😊" checked>
+                                    <label class="form-check-label" for="mood1">😊 행복</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="mood" id="mood2" value="🤩">
+                                    <label class="form-check-label" for="mood2">🤩 신남</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="mood" id="mood3" value="😴">
+                                    <label class="form-check-label" for="mood3">😴 피곤</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="mood" id="mood4" value="🍕">
+                                    <label class="form-check-label" for="mood4">🍕 배부름</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="mood" id="mood5" value="✈️">
+                                    <label class="form-check-label" for="mood5">✈️ 여행</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">사진 올리기 (여러 장 가능)</label>
+                            <input type="file" name="imageFiles" class="form-control" accept="image/*" multiple>
+                        </div>
+
                         <div class="mb-3">
                             <label class="form-label">내용</label>
                             <textarea name="content" class="form-control" rows="5" placeholder="오늘의 이야기를 들려주세요" required></textarea>

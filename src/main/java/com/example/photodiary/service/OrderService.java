@@ -2,9 +2,11 @@ package com.example.photodiary.service;
 
 import com.example.photodiary.controller.JsonConverter;
 import com.example.photodiary.model.DiaryPost;
+import com.example.photodiary.model.PostImage;
 import com.example.photodiary.model.PrintOrder;
 import com.example.photodiary.repository.DiaryPostRepository;
 import com.example.photodiary.repository.PrintOrderRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +19,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,18 +38,20 @@ public class OrderService {
     private String uploadDir;
 
     @Transactional
-    public void saveOrderRequest(String address) {
-        // 1. 비즈니스 로직: 게시글 ID 추출 및 변환
-        List<Long> postIds = diaryPostRepository.findAll().stream()
-                .map(DiaryPost::getId)
-                .toList();
-        String details = JsonConverter.toJson(postIds);
-
-        // 2. 엔티티 생성 및 저장
+    public void saveOrderRequest(String address, List<Long> selectedPostIds) {
         PrintOrder order = new PrintOrder();
-        order.setOrderDetails(details);
         order.setShippingAddress(address);
+        order.setOrderDate(LocalDateTime.now());
         order.setStatus("PENDING");
+
+        // 선택된 ID 리스트를 String 형태로 변환하여 저장 (예: "[1,3]")
+        try {
+            String details = objectMapper.writeValueAsString(selectedPostIds);
+            order.setOrderDetails(details);
+        } catch (JsonProcessingException e) {
+            order.setOrderDetails(selectedPostIds.toString());
+        }
+
         printOrderRepository.save(order);
     }
 
@@ -73,7 +78,7 @@ public class OrderService {
                 // 1. 데이터 매핑 로직 분리
                 postInfoList.add(convertToMap(post));
                 // 2. 이미지 압축 로직 분리
-                addThumbnailToZip(post, zos);
+                addImagesToZip(post, zos);
             });
         }
         exportData.put("posts", postInfoList);
@@ -92,36 +97,63 @@ public class OrderService {
         return info;
     }
 
-    private void addThumbnailToZip(DiaryPost post, ZipOutputStream zos) {
+    private void addImagesToZip(DiaryPost post, ZipOutputStream zos) {
         try {
-            String imageUrl = post.getImageUrl();
-            byte[] imageBytes;
+            // 1. 게시글에 속한 모든 이미지 리스트를 가져옴
+            List<PostImage> postImages = post.getImages();
 
-            if (imageUrl.startsWith("/images/")) {
-                // 1. 로컬 저장소(/app/uploads)에서 파일을 읽는 경우
-                String fileName = imageUrl.replace("/images/", "");
-                Path filePath = Paths.get(uploadDir).resolve(fileName);
-
-                if (Files.exists(filePath)) {
-                    imageBytes = Files.readAllBytes(filePath);
-                } else {
-                    System.err.println("⚠️ 파일을 찾을 수 없음: " + filePath);
-                    return;
-                }
-            } else {
-                // 2. 만약 기존의 외부 URL 데이터가 남아있을 경우를 대비한 하이브리드 처리
-                URL url = new URL(imageUrl);
-                imageBytes = StreamUtils.copyToByteArray(url.openStream());
+            if (postImages == null || postImages.isEmpty()) {
+                return; // 이미지가 없으면 건너뜀
             }
 
-            // 압축 파일 내부에 이미지 저장
-            ZipEntry entry = new ZipEntry("images/post_" + post.getId() + ".jpg");
-            zos.putNextEntry(entry);
-            zos.write(imageBytes);
-            zos.closeEntry();
+            int imageIndex = 1;
+            for (PostImage pi : postImages) {
+                String imageUrl = pi.getImageUrl();
+                byte[] imageBytes = null;
+
+                if (imageUrl != null && imageUrl.startsWith("/images/")) {
+                    // 2. 로컬 저장소(/app/uploads)에서 파일 읽기
+                    String fileName = imageUrl.replace("/images/", "");
+                    Path filePath = Paths.get(uploadDir).resolve(fileName);
+
+                    if (Files.exists(filePath)) {
+                        imageBytes = Files.readAllBytes(filePath);
+                    } else {
+                        System.err.println("⚠️ 파일을 찾을 수 없음: " + filePath);
+                        continue; // 다음 이미지로 진행
+                    }
+                } else if (imageUrl != null) {
+                    // 3. 외부 URL 처리 (하이브리드 대비)
+                    try {
+                        URL url = new URL(imageUrl);
+                        imageBytes = StreamUtils.copyToByteArray(url.openStream());
+                    } catch (Exception e) {
+                        System.err.println("⚠️ 외부 이미지 로드 실패: " + imageUrl);
+                        continue;
+                    }
+                }
+
+                if (imageBytes != null) {
+                    // 4. 압축 파일 내 경로 설정
+                    // 예: images/post_10/image_1.jpg (게시글별로 폴더를 나누면 더 깔끔합니다)
+                    String extension = "jpg"; // 기본값
+                    if (imageUrl.contains(".")) {
+                        extension = imageUrl.substring(imageUrl.lastIndexOf(".") + 1);
+                    }
+
+                    String entryName = "images/post_" + post.getId() + "/img_" + imageIndex + "." + extension;
+                    ZipEntry entry = new ZipEntry(entryName);
+
+                    zos.putNextEntry(entry);
+                    zos.write(imageBytes);
+                    zos.closeEntry();
+
+                    imageIndex++;
+                }
+            }
 
         } catch (Exception e) {
-            System.err.println("❌ 이미지 압축 중 오류 발생 (ID " + post.getId() + "): " + e.getMessage());
+            System.err.println("❌ 이미지 압축 중 오류 발생 (Post ID " + post.getId() + "): " + e.getMessage());
         }
     }
 

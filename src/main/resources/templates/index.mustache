@@ -7,39 +7,78 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/css/index.css">
+    <style>
+        .diary-card-img { height: 220px; object-fit: cover; }
+        .text-truncate-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .diary-card:hover { transform: translateY(-5px); transition: 0.3s; }
+    </style>
 </head>
-<body>
+<body class="bg-light">
 
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
     <div class="container">
-        <a class="navbar-brand" href="/">📸 Photo Diary</a>
+        <a class="navbar-brand fw-bold text-primary" href="/">📸 Photo Diary</a>
         <div class="d-flex">
             <button class="btn btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#orderModal">게시글 인쇄 요청</button>
             <button class="btn btn-outline-primary me-2" onclick="location.href='/order'">인쇄 주문 목록</button>
-            <button class="btn btn-primary" onclick="location.href='/post/new'">새 일기 쓰기</button>
+            <button class="btn btn-primary fw-bold" onclick="location.href='/post/new'">
+                <i class="bi bi-plus-lg"></i> 새 일기 쓰기
+            </button>
         </div>
     </div>
 </nav>
 
 <div class="container">
-    <div class="row pt-3">
-        <div class="col-12 mb-4 text-center text-md-start">
-            <h2 class="fw-bold">Image logs</h2>
-            <p class="text-muted">소중한 순간을 사진과 함께 남겨보세요.</p>
+    <div class="row pt-3 align-items-end mb-4">
+        <div class="col-md-6 text-center text-md-start">
+            <h2 class="fw-bold text-dark">Image Logs</h2>
+            <p class="text-muted">송산님의 소중한 순간들을 기록합니다.</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <div class="d-flex flex-wrap justify-content-md-end gap-2">
+                <a href="/" class="badge rounded-pill {{^selectedTag}}bg-primary{{/selectedTag}}{{#selectedTag}}bg-white text-dark border{{/selectedTag}} text-decoration-none px-3"># 전체</a>
+
+                <a href="/?tag=여행" class="badge rounded-pill bg-white text-dark border text-decoration-none px-3"># 여행</a>
+                <a href="/?tag=일상" class="badge rounded-pill bg-white text-dark border text-decoration-none px-3"># 일상</a>
+                <a href="/?tag=맛집" class="badge rounded-pill bg-white text-dark border text-decoration-none px-3"># 맛집</a>
+            </div>
         </div>
     </div>
 
     <div class="row">
         {{#posts}}
             <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card diary-card shadow-sm h-100" style="cursor: pointer;" onclick="location.href='/post/detail/{{id}}'">
-                    <img src="{{imageUrl}}" class="card-img-top diary-card-img" alt="Diary Image">
+                <div class="card diary-card shadow-sm border-0 h-100" style="cursor: pointer;" onclick="location.href='/post/detail/{{id}}'">
+
+                    <div class="position-relative">
+                        {{#firstImageUrl}}
+                            <img src="{{firstImageUrl}}" class="card-img-top diary-card-img" alt="Diary Image">
+                        {{/firstImageUrl}}
+                        {{^firstImageUrl}}
+                            <div class="bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center diary-card-img">
+                                <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                            </div>
+                        {{/firstImageUrl}}
+
+                        {{#mood}}<span class="position-absolute top-0 end-0 m-2 badge rounded-pill bg-white shadow-sm text-dark" style="font-size: 1.2rem;">{{.}}</span>{{/mood}}
+                    </div>
+
                     <div class="card-body">
-                        <h5 class="card-title fw-bold text-truncate">{{title}}</h5>
-                        <p class="card-text text-secondary small mb-2">
-                            by {{author}} | {{formattedDate}}
+                        <h5 class="card-title fw-bold text-dark text-truncate">{{title}}</h5>
+
+                        <p class="card-text text-secondary mb-2" style="font-size: 0.85rem;">
+                            <i class="bi bi-person"></i> {{author}} <span class="mx-1">|</span> <i class="bi bi-calendar3"></i> {{getFormattedDate}}
                         </p>
-                        <p class="card-text text-muted text-truncate-3">
+                        <div class="mt-2">
+                            {{#tag}} <span class="badge bg-light text-primary border">#{{tag}}</span>
+                            {{/tag}}
+                        </div>
+                        <p class="card-text text-muted text-truncate-3 small">
                             {{content}}
                         </p>
                     </div>
@@ -49,47 +88,76 @@
 
         {{^posts}}
             <div class="col-12 text-center py-5">
-                <div class="display-1 text-muted mb-4"><i class="bi bi-journal-x"></i></div>
-                <h4>아직 작성된 다이어리가 없어요.</h4>
-                <p class="text-muted">오른쪽 상단의 '새 일기 쓰기' 버튼을 눌러보세요!</p>
+                <i class="bi bi-journal-x display-1 text-muted"></i>
+                <h4 class="mt-4 text-muted">아직 작성된 다이어리가 없어요.</h4>
+                <p class="text-secondary">첫 번째 일기를 작성하고 추억을 기록해 보세요!</p>
             </div>
         {{/posts}}
     </div>
-
-    <footer class="mt-5 py-4 border-top">
-        <div class="row align-items-center">
-            <div class="col-md-6 text-center text-md-start">
-                <span class="text-muted small">© 2026 <strong>Songsan</strong>. All rights reserved.</span>
-            </div>
-            <div class="col-md-6 text-center text-md-end mt-2 mt-md-0">
-                <a href="https://github.com/saniolsida/photo_diary.git" class="text-decoration-none text-secondary small me-3" target="_blank">
-                    <i class="bi bi-github"></i> GitHub
-                </a>
-                <span class="text-muted small">Built with Spring Boot & Mustache</span>
-            </div>
-        </div>
-    </footer>
 </div>
 
 <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content shadow">
             <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold" id="orderModalLabel">📦 인쇄 배송지 입력</h5>
+                <h5 class="modal-title fw-bold" id="orderModalLabel">📦 인쇄 및 배송 요청</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="/order/request" method="post">
+
+            <form action="/order/request" method="post" id="orderForm">
                 <div class="modal-body">
-                    <p class="text-muted small mb-4">포토북을 배송받으실 정확한 주소를 입력해주세요.</p>
-                    <div class="mb-3">
+                    <div class="px-2 mb-4">
                         <label for="shippingAddress" class="form-label fw-bold">배송지 주소</label>
                         <input type="text" class="form-control form-control-lg" id="shippingAddress" name="shippingAddress"
                                placeholder="예: 서울특별시 강남구 테헤란로 123" required>
+                        <p class="text-muted small mt-2">포토북을 배송받으실 정확한 주소를 입력해주세요.</p>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="px-2">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold mb-0">인쇄할 다이어리 선택</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="selectAll">
+                                <label class="form-check-label small fw-bold" for="selectAll">전체 선택</label>
+                            </div>
+                        </div>
+
+                        <div class="row g-2" id="printList" style="max-height: 300px; overflow-y: auto;">
+                            {{#posts}}
+                                <div class="col-12">
+                                    <div class="card border-0 shadow-sm print-item-card mb-2" style="cursor: pointer; background-color: #f8f9fa;" onclick="toggleCheck('{{id}}')">
+                                        <div class="card-body d-flex align-items-center py-2">
+                                            <div class="form-check me-3">
+                                                <input class="form-check-input print-checkbox" type="checkbox"
+                                                       name="selectedPostIds" value="{{id}}" id="check-{{id}}"
+                                                       onclick="event.stopPropagation(); updateCount();">
+                                            </div>
+                                            <div class="flex-grow-1 overflow-hidden">
+                                                <h6 class="mb-0 fw-bold text-truncate" style="font-size: 0.9rem;">{{title}}</h6>
+                                                <small class="text-muted" style="font-size: 0.8rem;">{{formattedDate}}</small>
+                                            </div>
+                                            {{#tag}}
+                                                <span class="badge bg-white text-primary border small ms-2">#{{.}}</span>
+                                            {{/tag}}
+                                        </div>
+                                    </div>
+                                </div>
+                            {{/posts}}
+                            {{^posts}}
+                                <div class="text-center py-4 text-muted">선택 가능한 다이어리가 없습니다.</div>
+                            {{/posts}}
+                        </div>
+                        <div class="text-end mt-2">
+                            <small class="text-primary fw-bold" id="selectedCount">0개 선택됨</small>
+                        </div>
                     </div>
                 </div>
+
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">취소</button>
-                    <button type="submit" class="btn btn-primary px-4">주문 확정</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold">주문 확정</button>
                 </div>
             </form>
         </div>
@@ -98,10 +166,62 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    // 1. 주문 성공 알림 및 URL 정리
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('orderSuccess') === 'true') {
         alert('📦 인쇄 주문이 성공적으로 접수되었습니다!');
         window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const selectAll = document.getElementById('selectAll');
+        const orderForm = document.getElementById('orderForm');
+
+        // 2. 전체 선택/해제 기능
+        if (selectAll) {
+            selectAll.addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('.print-checkbox');
+                checkboxes.forEach(cb => {
+                    cb.checked = selectAll.checked;
+                });
+                updateCount();
+            });
+        }
+
+        // 3. 폼 제출 시 유효성 검사
+        if (orderForm) {
+            orderForm.addEventListener('submit', function(e) {
+                const checkedCount = document.querySelectorAll('.print-checkbox:checked').length;
+                if (checkedCount === 0) {
+                    e.preventDefault(); // 제출 중단
+                    alert("인쇄할 다이어리를 최소 하나 이상 선택해주세요!");
+                }
+            });
+        }
+    });
+
+    // 4. 카드 클릭 시 체크박스 토글 (전역 함수)
+    function toggleCheck(id) {
+        const cb = document.getElementById('check-' + id);
+        if (cb) {
+            cb.checked = !cb.checked;
+            updateCount();
+        }
+    }
+
+    // 5. 선택된 개수 및 전체 선택 상태 업데이트
+    function updateCount() {
+        const checkboxes = document.querySelectorAll('.print-checkbox');
+        const checkedCount = document.querySelectorAll('.print-checkbox:checked').length;
+        const selectAll = document.getElementById('selectAll');
+
+        // 개수 텍스트 업데이트
+        document.getElementById('selectedCount').innerText = checkedCount + "개 선택됨";
+
+        // 모든 체크박스가 체크되면 전체 선택도 체크, 아니면 해제
+        if (selectAll) {
+            selectAll.checked = (checkboxes.length > 0 && checkedCount === checkboxes.length);
+        }
     }
 </script>
 </body>

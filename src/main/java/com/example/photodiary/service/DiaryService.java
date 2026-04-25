@@ -1,6 +1,7 @@
 package com.example.photodiary.service;
 
 import com.example.photodiary.model.DiaryPost;
+import com.example.photodiary.model.PostImage;
 import com.example.photodiary.repository.DiaryPostRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -19,6 +20,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,13 +33,17 @@ public class DiaryService {
     private static final List<String> ALLOWED_MIME_TYPES = Arrays.asList("image/jpeg", "image/png", "image/gif");
 
     @Transactional(readOnly = true)
-    public List<DiaryPost> getAllPosts() {
-        return diaryPostRepository.findAll();
+    public List<DiaryPost> getAllPosts(String tag) {
+        if (tag != null && !tag.isEmpty()) {
+            return diaryPostRepository.findAllByTagOrderByCreatedAtDesc(tag);
+        }
+        return diaryPostRepository.findAllByOrderByCreatedAtDesc();
     }
 
     @Transactional(readOnly = true)
     public DiaryPost getPostById(Long id) {
-        return diaryPostRepository.findById(id)
+        // 기존 findById 대신 새로 만든 메서드 호출
+        return diaryPostRepository.findByIdWithImages(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + id));
     }
 
@@ -45,63 +51,82 @@ public class DiaryService {
     private String uploadDir;
 
     @Transactional
-    public void savePost(DiaryPost post, MultipartFile imageFile) throws IOException {
-        if (imageFile != null && !imageFile.isEmpty()) {
+    public void savePost(DiaryPost post, List<MultipartFile> imageFiles) throws IOException {
+        // 1. 수정 모드일 때 데이터 복사
+        if (post.getId() != null) {
+            diaryPostRepository.findById(post.getId()).ifPresent(existingPost -> {
+                existingPost.setTitle(post.getTitle());
+                existingPost.setContent(post.getContent());
+                existingPost.setAuthor(post.getAuthor()); // 여기서 author가 null이면 위험!
+                existingPost.setMood(post.getMood());
+                existingPost.setTag(post.getTag());
+                // 핵심: 새 파일이 실제로 있을 때만 기존 사진을 지운다!
+                boolean hasNewFiles = imageFiles != null && imageFiles.stream().anyMatch(f -> !f.isEmpty());
 
-            validateImage(imageFile);
+                if (hasNewFiles) {
+                    System.out.println("🧹 [DEBUG] 새 파일이 감지되어 기존 이미지 정리");
+                    for (PostImage oldImg : existingPost.getImages()) {
+                        deletePhysicalFile(oldImg.getImageUrl());
+                    }
+                    existingPost.getImages().clear();
+                    // 새 이미지 처리 (기존 로직과 동일하게 진행하되 existingPost에 추가)
+                    try {
+                        processImages(imageFiles, existingPost);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                // 새 파일이 없으면 existingPost의 images 리스트를 건드리지 않음 (보존됨)
 
-            // [추가] 수정 시 기존 이미지가 있다면 먼저 삭제
-            if (post.getId() != null) {
-                diaryPostRepository.findById(post.getId()).ifPresent(oldPost -> {
-                    deletePhysicalFile(oldPost.getImageUrl());
-                });
-            }
-            // 1. 절대 경로를 수동으로 강제 조립 (가장 안전한 방법)
-            // uploadDir이 "/app/uploads/" 라면, 시스템 루트(/)부터 시작하도록 보장
-            File rootFolder = new File("/app/uploads");
-
-            if (!rootFolder.exists()) {
-                rootFolder.mkdirs();
-            }
-
-            String fileName = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
-
-            // 2. 부모 폴더와 파일명을 결합하여 절대 경로 생성
-            File targetFile = new File(rootFolder, fileName);
-            Path targetPath = targetFile.toPath();
-
-            // 3. Files.copy 사용 (이미지 스트림 직접 쓰기)
-            try (InputStream is = imageFile.getInputStream()) {
-                Files.copy(is, targetPath, StandardCopyOption.REPLACE_EXISTING);
-            }
-
-            post.setImageUrl("/images/" + fileName);
+                diaryPostRepository.save(existingPost);
+            });
+        } else {
+            // 신규 등록 로직
+            processImages(imageFiles, post);
+            diaryPostRepository.save(post);
         }
-        diaryPostRepository.save(post);
+    }
+
+    // 이미지 처리 로직을 별도 메서드로 분리하면 깔끔합니다
+    private void processImages(List<MultipartFile> imageFiles, DiaryPost targetPost) throws IOException {
+        if (imageFiles == null) return;
+
+        File rootFolder = new File(uploadDir);
+        if (!rootFolder.exists()) rootFolder.mkdirs();
+
+        for (MultipartFile file : imageFiles) {
+            if (file.isEmpty()) continue;
+
+            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            Path targetPath = new File(rootFolder, fileName).toPath();
+
+            try (InputStream is = file.getInputStream()) {
+                Files.copy(is, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                PostImage postImage = new PostImage();
+                postImage.setImageUrl("/images/" + fileName);
+                targetPost.addImage(postImage);
+            }
+        }
     }
 
     @Transactional
     public void deletePost(Long id) {
-        // 1. 삭제 전 기존 포스트 정보를 가져와 이미지 경로 파악
         diaryPostRepository.findById(id).ifPresent(post -> {
-            // 2. 실제 파일 삭제
-            deletePhysicalFile(post.getImageUrl());
+            // 해당 포스트에 달린 모든 이미지 파일을 물리적으로 삭제
+            for (PostImage img : post.getImages()) {
+                deletePhysicalFile(img.getImageUrl());
+            }
         });
-        // 3. DB 데이터 삭제
+        // DB 데이터 삭제 (연관된 PostImage 레코드도 자동 삭제됨)
         diaryPostRepository.deleteById(id);
     }
 
-    // 실제 물리적 파일을 삭제하는 유틸리티 메서드
     private void deletePhysicalFile(String imageUrl) {
         if (imageUrl != null && imageUrl.startsWith("/images/")) {
             String fileName = imageUrl.replace("/images/", "");
             File fileToDelete = new File("/app/uploads/" + fileName);
             if (fileToDelete.exists()) {
-                if (fileToDelete.delete()) {
-                    System.out.println("🗑️ 파일 삭제 성공: " + fileName);
-                } else {
-                    System.err.println("⚠️ 파일 삭제 실패: " + fileName);
-                }
+                fileToDelete.delete();
             }
         }
     }

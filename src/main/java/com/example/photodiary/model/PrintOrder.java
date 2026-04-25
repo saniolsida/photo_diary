@@ -57,4 +57,9 @@ public class PrintOrder {
         this.status = "PENDING"; // 초기 상태 [cite: 29]
         this.orderDate = LocalDateTime.now();
     }
+
+    public String getFormattedDate() {
+        if (this.orderDate == null) return "";
+        return this.orderDate.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+    }
 }

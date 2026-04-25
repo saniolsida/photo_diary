@@ -6,6 +6,8 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -23,8 +25,25 @@ public class DiaryPost {
     @Column(columnDefinition = "TEXT")
     private String content; // 내용
 
-    @Column(name = "image_url")
-    private String imageUrl;
+    private String mood; // 기분 이모티콘 저장
+
+    private String tag;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostImage> images = new ArrayList<>();
+
+    // 편의 메서드
+    public void addImage(PostImage image) {
+        images.add(image);
+        image.setPost(this);
+    }
+
+    public String getFirstImageUrl() {
+        if (this.images != null && !this.images.isEmpty()) {
+            return this.images.get(0).getImageUrl();
+        }
+        return null; // 사진이 없을 경우 null 반환
+    }
 
     @Column(name = "created_at")
     private LocalDateTime createdAt; //작성일
