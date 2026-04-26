@@ -167,6 +167,14 @@ public class OrderService {
     }
 
     @Transactional
+    public void rejectOrder(Long id) {
+        PrintOrder order = printOrderRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("주문 내역 없음: " + id));
+        order.setStatus("REJECTED");
+        printOrderRepository.save(order);
+    }
+
+    @Transactional
     public void completeOrder(PrintOrder order) {
         try {
             order.setStatus("COMPLETED");

@@ -22,6 +22,10 @@ public class PrintOrder {
         return "COMPLETED".equals(this.status);
     }
 
+    public boolean isRejected() {
+        return "REJECTED".equals(this.status);
+    }
+
     public String getDisplayPostIds() {
         if (this.orderDetails == null || this.orderDetails.isEmpty()) {
             return "없음";
@@ -34,6 +38,7 @@ public class PrintOrder {
         if ("PENDING".equals(this.status)) return "bg-secondary";
         if ("PROCESSING".equals(this.status)) return "bg-warning text-dark";
         if ("COMPLETED".equals(this.status)) return "bg-success";
+        if ("REJECTED".equals(this.status)) return "bg-danger";
         return "bg-dark";
     }
 

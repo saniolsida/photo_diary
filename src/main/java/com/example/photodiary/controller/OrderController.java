@@ -75,7 +75,7 @@ public class OrderController {
 
     @PostMapping("/order/delete/{id}")
     public String deleteOrder(@PathVariable("id") Long id) {
-        printOrderRepository.deleteById(id);
-        return "redirect:/order"; // 다시 관리 페이지로 리다이렉트
+        orderService.rejectOrder(id);
+        return "redirect:/order";
     }
 }

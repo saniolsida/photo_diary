@@ -45,6 +45,7 @@
                             {{#isPending}}<span class="badge bg-secondary bg-opacity-10 text-secondary">PENDING</span>{{/isPending}}
                             {{#isProcessing}}<span class="badge badge-processing">PROCESSING</span>{{/isProcessing}}
                             {{#isCompleted}}<span class="badge badge-completed text-white">COMPLETED</span>{{/isCompleted}}
+                            {{#isRejected}}<span class="badge bg-danger text-white">REJECTED</span>{{/isRejected}}
                         </td>
                         <td class="text-muted small">{{formattedDate}}</td>
                         <td class="text-center align-middle" style="min-width: 160px;">
@@ -88,6 +89,14 @@
                                     </span>
                                 </div>
                             {{/isCompleted}}
+
+                            {{#isRejected}}
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <span class="text-danger small fw-bold">
+                                        <i class="bi bi-x-circle"></i> 반려됨
+                                    </span>
+                                </div>
+                            {{/isRejected}}
                         </td>
                     </tr>
                 {{/orders}}
