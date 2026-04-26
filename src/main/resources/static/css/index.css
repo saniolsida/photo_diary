@@ -45,13 +45,6 @@ footer {
 
 /* --- 상세 페이지(view-detail) 전용 스타일 --- */
 
-/* 상세 이미지 스타일 */
-.detail-img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 12px;
-    margin-bottom: 25px;
-}
 
 /* 본문 영역: 줄바꿈 유지 및 가독성 향상 */
 .content-area {
@@ -92,9 +85,10 @@ footer {
 /* 이미지 영역 */
 .detail-img {
     width: 100%;
-    height: 500px;
-    object-fit: cover;
+    aspect-ratio: 4/3;
+    object-fit: contain;
     display: block;
+    background-color: #fff;
 }
 
 #diaryCarousel {

@@ -48,6 +48,10 @@ public class PrintOrder {
 
     private String shippingAddress;
 
+    private String receiverName;
+
+    private String receiverNumber;
+
     // 주문된 게시글 Id 모음
     @Column(columnDefinition = "TEXT")
     private String orderDetails;

@@ -5,6 +5,7 @@ target/
 !**/src/test/**/target/
 
 .env
+db_data/
 ### STS ###
 .apt_generated
 .classpath
@@ -32,3 +33,4 @@ build/
 
 ### VS Code ###
 .vscode/
+.claude/

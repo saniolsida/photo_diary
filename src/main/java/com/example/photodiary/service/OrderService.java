@@ -20,10 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -38,9 +35,11 @@ public class OrderService {
     private String uploadDir;
 
     @Transactional
-    public void saveOrderRequest(String address, List<Long> selectedPostIds) {
+    public void saveOrderRequest(String address, String name, String number, List<Long> selectedPostIds) {
         PrintOrder order = new PrintOrder();
         order.setShippingAddress(address);
+        order.setReceiverName(name);
+        order.setReceiverNumber(number);
         order.setOrderDate(LocalDateTime.now());
         order.setStatus("PENDING");
 
@@ -66,8 +65,10 @@ public class OrderService {
 
     @Transactional
     public void createOrderZip(PrintOrder order, ZipOutputStream zos) throws IOException {
-        Map<String, Object> exportData = new HashMap<>();
+        Map<String, Object> exportData = new LinkedHashMap<>();
         exportData.put("orderId", order.getId());
+        exportData.put("receiverName", order.getReceiverName());
+        exportData.put("receiverNumber", order.getReceiverNumber());
         exportData.put("shippingAddress", order.getShippingAddress());
 
         List<Map<String, Object>> postInfoList = new ArrayList<>();
@@ -88,7 +89,7 @@ public class OrderService {
     }
 
     private Map<String, Object> convertToMap(DiaryPost post) {
-        Map<String, Object> info = new HashMap<>();
+        Map<String, Object> info = new LinkedHashMap<>();
         info.put("id", post.getId());
         info.put("title", post.getTitle());
         info.put("author", post.getAuthor());

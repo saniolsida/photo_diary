@@ -7,16 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/css/index.css">
-    <style>
-        .diary-card-img { height: 220px; object-fit: cover; }
-        .text-truncate-3 {
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .diary-card:hover { transform: translateY(-5px); transition: 0.3s; }
-    </style>
 </head>
 <body class="bg-light">
 
@@ -106,6 +96,21 @@
 
             <form action="/order/request" method="post" id="orderForm">
                 <div class="modal-body">
+                    <div class="px-2 mb-3">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="receiverName" class="form-label fw-bold">수령인 성함</label>
+                                <input type="text" class="form-control" id="receiverName" name="receiverName"
+                                       placeholder="이름을 입력하세요" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="phoneNumber" class="form-label fw-bold">연락처</label>
+                                <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber"
+                                       placeholder="010-0000-0000" required>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="px-2 mb-4">
                         <label for="shippingAddress" class="form-label fw-bold">배송지 주소</label>
                         <input type="text" class="form-control form-control-lg" id="shippingAddress" name="shippingAddress"
@@ -165,64 +170,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    // 1. 주문 성공 알림 및 URL 정리
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('orderSuccess') === 'true') {
-        alert('📦 인쇄 주문이 성공적으로 접수되었습니다!');
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
-
-    document.addEventListener("DOMContentLoaded", function() {
-        const selectAll = document.getElementById('selectAll');
-        const orderForm = document.getElementById('orderForm');
-
-        // 2. 전체 선택/해제 기능
-        if (selectAll) {
-            selectAll.addEventListener('change', function() {
-                const checkboxes = document.querySelectorAll('.print-checkbox');
-                checkboxes.forEach(cb => {
-                    cb.checked = selectAll.checked;
-                });
-                updateCount();
-            });
-        }
-
-        // 3. 폼 제출 시 유효성 검사
-        if (orderForm) {
-            orderForm.addEventListener('submit', function(e) {
-                const checkedCount = document.querySelectorAll('.print-checkbox:checked').length;
-                if (checkedCount === 0) {
-                    e.preventDefault(); // 제출 중단
-                    alert("인쇄할 다이어리를 최소 하나 이상 선택해주세요!");
-                }
-            });
-        }
-    });
-
-    // 4. 카드 클릭 시 체크박스 토글 (전역 함수)
-    function toggleCheck(id) {
-        const cb = document.getElementById('check-' + id);
-        if (cb) {
-            cb.checked = !cb.checked;
-            updateCount();
-        }
-    }
-
-    // 5. 선택된 개수 및 전체 선택 상태 업데이트
-    function updateCount() {
-        const checkboxes = document.querySelectorAll('.print-checkbox');
-        const checkedCount = document.querySelectorAll('.print-checkbox:checked').length;
-        const selectAll = document.getElementById('selectAll');
-
-        // 개수 텍스트 업데이트
-        document.getElementById('selectedCount').innerText = checkedCount + "개 선택됨";
-
-        // 모든 체크박스가 체크되면 전체 선택도 체크, 아니면 해제
-        if (selectAll) {
-            selectAll.checked = (checkboxes.length > 0 && checkedCount === checkboxes.length);
-        }
-    }
-</script>
+<script src="/js/index_request_print.js"></script>
 </body>
 </html>
