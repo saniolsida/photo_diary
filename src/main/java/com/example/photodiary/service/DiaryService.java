@@ -64,7 +64,6 @@ public class DiaryService {
                 boolean hasNewFiles = imageFiles != null && imageFiles.stream().anyMatch(f -> !f.isEmpty());
 
                 if (hasNewFiles) {
-                    System.out.println("🧹 [DEBUG] 새 파일이 감지되어 기존 이미지 정리");
                     for (PostImage oldImg : existingPost.getImages()) {
                         deletePhysicalFile(oldImg.getImageUrl());
                     }

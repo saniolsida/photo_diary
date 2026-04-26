@@ -30,21 +30,6 @@ public class HomeController {
     public String postDetail(@PathVariable Long id, Model model) {
         DiaryPost post = diaryService.getPostById(id);
 
-        // [로그 추가] 터미널에서 바로 확인 가능
-        System.out.println("========================================");
-        System.out.println("🔍 [DEBUG] 상세 페이지 진입 - ID: " + id);
-        System.out.println("🔍 [DEBUG] 제목: " + post.getTitle());
-
-        if (post.getImages() != null) {
-            System.out.println("🔍 [DEBUG] 연결된 이미지 개수: " + post.getImages().size());
-            post.getImages().forEach(img ->
-                    System.out.println("🔍 [DEBUG] 이미지 URL: " + img.getImageUrl())
-            );
-        } else {
-            System.out.println("🔍 [DEBUG] 이미지 리스트가 NULL입니다.");
-        }
-        System.out.println("========================================");
-
         model.addAttribute("post", post);
         return "view-detail";
     }
