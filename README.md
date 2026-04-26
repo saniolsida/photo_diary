@@ -21,13 +21,17 @@
 심사관 환경에서 즉시 실행 가능하도록 Docker 환경 설정을 완료했습니다.
 
 ```bash
-# 1. 환경 변수 준비
+# 저장소 클론
+git clone https://github.com/saniolsida/photo_diary.git
+cd photo_diary
+
+# 환경 변수 준비
 cp .env.example .env
 
-# 2. 실행 (빌드 포함)
+# 실행 (빌드 포함)
 docker-compose up
 
-# 3. 접속
+# 접속
 # 브라우저에서 http://localhost:8080 접속
 # 포트 변경이 필요한 경우 docker-compose.yml 수정
 ```
